@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REVMO LAB | Real Multiplayer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">✚ REVMO<span>LAB</span></div>
+    <div class="status">● LABORATORIYA FAOL</div>
+  </header>
+
+  <main>
+    <!-- ASOSIY MENYU -->
+    <section id="room-menu" class="hero">
+      <div>
+        <p class="eyebrow">REAL OYINCHILAR LOBBIsi</p>
+        <h1>Detektivlar <span>xonasi.</span></h1>
+        <p class="description">
+          Oʻyinga kirish uchun nik kiriting. Xona yarating yoki doʻstingiz ochgan xona kodini kiritib qoʻshiling. Kamida 2 kishi yigʻilishi shart.
+        </p>
+        
+        <div class="setup-box" style="margin: 20px 0; display: grid; gap: 12px; max-width: 380px;">
+          <input type="text" id="playerNickname" placeholder="Nik nomingizni kiriting..." maxlength="20" style="padding: 14px; border-radius: 10px; background: #132c3b; border: 1px solid #2c4b5a; color: white; font-family: inherit; font-size: 14px;">
+          
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="secondary" id="randomNickBtn" style="flex: 1; border: 1px solid #355363;">🎲 Random ism</button>
+          </div>
+
+          <hr style="border-color: #294251; margin: 5px 0;">
+
+          <div style="display: flex; gap: 10px;">
+            <button type="button" id="showCreateModalBtn" style="flex: 1; background: #245567; color: var(--mint);">🏠 Xona yaratish</button>
+            <button type="button" id="showJoinModalBtn" style="flex: 1;">🔗 Xonaga kirish</button>
+          </div>
+        </div>
+      </div>
+      <div class="lab-art">
+        <div class="orb">🧪</div>
+        <div class="float one">Min 2 kishi</div>
+        <div class="float two">Real o'yinchilar</div>
+        <div class="float three">Kutish zali</div>
+      </div>
+    </section>
+
+    <!-- XONA YARATISH MODALI -->
+    <div id="createRoomModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,21,31,0.85); display:grid; place-items:center; z-index:100;">
+      <div style="background:#102635; padding:30px; border-radius:16px; border:1px solid #2c4b5a; max-width:400px; width:90%; display:grid; gap:15px;">
+        <h3 style="margin:0; color:var(--mint);">Xona yaratish</h3>
+        <div>
+          <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">Xona kodi:</label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="newRoomCode" placeholder="Masalan: 4821" style="flex:1; padding:12px; border-radius:8px; background:#132c3b; border:1px solid #2c4b5a; color:white;">
+            <button type="button" class="secondary" id="randomCodeBtn" style="padding:10px; border:1px solid #355363;">🎲 Random</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button type="button" class="secondary" id="closeCreateModal" style="flex:1;">Orqaga</button>
+          <button type="button" id="confirmCreateRoom" style="flex:1;">Tuzish →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- XONAGA KIRISH MODALI -->
+    <div id="joinRoomModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,21,31,0.85); display:grid; place-items:center; z-index:100;">
+      <div style="background:#102635; padding:30px; border-radius:16px; border:1px solid #2c4b5a; max-width:400px; width:90%; display:grid; gap:15px;">
+        <h3 style="margin:0; color:var(--mint);">Xonaga ulanish</h3>
+        <div>
+          <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">Xona kodini kiriting:</label>
+          <input type="text" id="enterRoomCode" placeholder="Xona kodi..." style="width:100%; padding:12px; border-radius:8px; background:#132c3b; border:1px solid #2c4b5a; color:white;">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button type="button" class="secondary" id="closeJoinModal" style="flex:1;">Orqaga</button>
+          <button type="button" id="confirmJoinRoom" style="flex:1;">Kirish →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KUTISH ZALI -->
+    <section id="waiting-room" class="hidden" style="max-width:600px; margin:40px auto; padding:30px; background:#0d202d; border:1px solid #294858; border-radius:20px; text-align:center;">
+      <p class="eyebrow">KUTISH ZALI (REAL ODAMLAR)</p>
+      <h2>Xona kodi: <span id="lobbyRoomCode" style="color:var(--mint);">----</span></h2>
+      <p class="description" style="margin: 15px 0;">Haqiqiy o'yinchilar qo'shilishini kutmoqdamiz...</p>
+      
+      <div style="background:#132c3b; padding:20px; border-radius:12px; margin:20px 0; border:1px solid #2c4b5a;">
+        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Xonadagi real o'yinchilar:</p>
+        <ul id="playerList" style="list-style:none; padding:0; margin:0; display:grid; gap:8px; font-weight:600; color:var(--mint);">
+          <!-- O'yinchilar ro'yxati -->
+        </ul>
+      </div>
+
+      <p id="waitingStatus" style="font-size:13px; color:#ffb74d; margin-bottom:20px;">O'yin boshlanishi uchun kamida 2 kishi kerak...</p>
+      
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button type="button" class="secondary" onclick="leaveLobby()">Chiqish</button>
+        <button type="button" id="startMultiGameBtn" disabled style="opacity: 0.5; cursor: not-allowed;">O'yinni boshlash</button>
+      </div>
+    </section>
+
+    <!-- OYIN QISMI -->
+    <section id="game" class="hidden">
+      <div class="game-head">
+        <div>
+          <p class="eyebrow" id="mission">MISSIYA 1 / 3</p>
+          <h2 id="title">Dalillarni bog‘la</h2>
+        </div>
+        <div class="score">BALL <b id="score">0</b></div>
+      </div>
+
+      <div class="progress"><div id="bar"></div></div>
+      <div class="meta">
+        <span id="stage">1-BOSQICH</span>
+        <span>⏱ <b id="time">90</b> soniya</span>
+      </div>
+
+      <p id="instruction"></p>
+      <div id="board"></div>
+      <p id="feedback" aria-live="polite"></p>
+
+      <div class="actions">
+        <button class="secondary" onclick="resetToMenu()">↻ Chiqish</button>
+        <button id="check" onclick="checkAnswer()">Tekshirish →</button>
+      </div>
+    </section>
+
+    <!-- NATIJA QISMI -->
+    <section id="result" class="hidden result">
+      <div class="trophy">🏆</div>
+      <p class="eyebrow">MISSIYA YAKUNLANDI</p>
+      <h2 id="resultTitle">Ajoyib, detektiv!</h2>
+      <p>Oʻyinchi: <b id="resultNick" style="color: var(--mint);"></b> | Xona: <b id="resultRoom" style="color: var(--mint);"></b></p>
+      <p>Yakuniy natijangiz:</p>
+      <div class="final-score"><b id="finalScore">0</b><span> / 300 ball</span></div>
+      <div id="details"></div>
+      <button onclick="resetToMenu()">BOSH MENYUGA QAYTISH ↻</button>
+      <p class="note">Bu ta’limiy simulyator. Laboratoriya natijalari yakka o‘zi kasallik tashxisini tasdiqlamaydi.</p>
+    </section>
+  </main>
+
+  <footer>REVMOLAB © 2026 · TIBBIY TA'LIM SIMULYATORI</footer>
+  <script src="node.js"></script>
+</body>
+</html>
