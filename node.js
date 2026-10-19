@@ -9,7 +9,7 @@ const randomNames = [
 let playerName = "";
 let currentRoom = "";
 let roomPlayers = []; 
-let broadcastChannel = null;
+let storageInterval = null;
 
 let stage = 0, score = 0, time = 90, timer;
 let stageScores = [0, 0, 0];
@@ -138,9 +138,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   $("startMultiGameBtn").addEventListener("click", () => {
-    if (broadcastChannel) {
-      broadcastChannel.postMessage({ type: 'START_GAME' });
-    }
+    localStorage.setItem('revmo_start_' + currentRoom, 'true');
     startRealGame();
   });
 });
@@ -160,36 +158,38 @@ function openWaitingRoom() {
   $("waiting-room").classList.remove("hidden");
   $("lobbyRoomCode").textContent = currentRoom;
 
-  if (broadcastChannel) broadcastChannel.close();
-
-  // Brauzer tablararo real ulanish uchun kanal ochamiz (botlar yo'q!)
-  broadcastChannel = new BroadcastChannel('revmolab_room_' + currentRoom);
-
-  roomPlayers = [playerName];
+  // Xonadagilar ro'yxatini LocalStorage'ga qo'shamiz
+  let key = 'revmo_room_' + currentRoom;
+  let players = JSON.parse(localStorage.getItem(key)) || [];
+  
+  if (!players.includes(playerName)) {
+    players.push(playerName);
+  }
+  localStorage.setItem(key, JSON.stringify(players));
+  roomPlayers = players;
   updatePlayerListUI();
 
-  // Boshqalarga qo'shilganimizni bildiramiz
-  broadcastChannel.postMessage({ type: 'JOIN', player: playerName });
-
-  broadcastChannel.onmessage = (event) => {
-    const data = event.data;
-    if (data.type === 'JOIN') {
-      if (!roomPlayers.includes(data.player)) {
-        roomPlayers.push(data.player);
-        updatePlayerListUI();
+  // Har 1 sekundda boshqa o'yinchilar qo'shilganini tekshirib turamiz
+  if (storageInterval) clearInterval(storageInterval);
+  storageInterval = setInterval(() => {
+    let currentStoredPlayers = JSON.parse(localStorage.getItem(key)) || [];
+    
+    // Yangi o'yinchi qo'shilgan bo'lsa yangilaymiz
+    if (currentStoredPlayers.length !== roomPlayers.length || !currentStoredPlayers.every(p => roomPlayers.includes(p))) {
+      roomPlayers = currentStoredPlayers;
+      if (!roomPlayers.includes(playerName)) {
+        roomPlayers.push(playerName);
+        localStorage.setItem(key, JSON.stringify(roomPlayers));
       }
-      broadcastChannel.postMessage({ type: 'SYNC', players: roomPlayers });
-    } else if (data.type === 'SYNC') {
-      data.players.forEach(p => {
-        if (!roomPlayers.includes(p)) {
-          roomPlayers.push(p);
-        }
-      });
       updatePlayerListUI();
-    } else if (data.type === 'START_GAME') {
+    }
+
+    // Agar o'yin boshlangan bo'lsa boshqalarda ham ochiladi
+    if (localStorage.getItem('revmo_start_' + currentRoom) === 'true') {
+      clearInterval(storageInterval);
       startRealGame();
     }
-  };
+  }, 1000);
 }
 
 function updatePlayerListUI() {
@@ -215,14 +215,28 @@ function updatePlayerListUI() {
 }
 
 function leaveLobby() {
-  if (broadcastChannel) broadcastChannel.close();
+  if (storageInterval) clearInterval(storageInterval);
+  removeFromRoom();
   $("waiting-room").classList.add("hidden");
   $("room-menu").classList.remove("hidden");
 }
 
+function removeFromRoom() {
+  let key = 'revmo_room_' + currentRoom;
+  let players = JSON.parse(localStorage.getItem(key)) || [];
+  players = players.filter(p => p !== playerName);
+  if (players.length > 0) {
+    localStorage.setItem(key, JSON.stringify(players));
+  } else {
+    localStorage.removeItem(key);
+    localStorage.removeItem('revmo_start_' + currentRoom);
+  }
+}
+
 function resetToMenu() {
   clearInterval(timer);
-  if (broadcastChannel) broadcastChannel.close();
+  if (storageInterval) clearInterval(storageInterval);
+  removeFromRoom();
   $("game").classList.add("hidden");
   $("result").classList.add("hidden");
   $("waiting-room").classList.add("hidden");
@@ -230,6 +244,7 @@ function resetToMenu() {
 }
 
 function startRealGame() {
+  if (storageInterval) clearInterval(storageInterval);
   $("waiting-room").classList.add("hidden");
   $("game").classList.remove("hidden");
   startGameEngine();
