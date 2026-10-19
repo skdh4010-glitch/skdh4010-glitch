@@ -7,7 +7,6 @@ const randomNames = [
 ];
 
 let playerName = "";
-let currentRoom = "";
 let roomPlayers = []; 
 let storageInterval = null;
 
@@ -92,74 +91,27 @@ window.addEventListener("DOMContentLoaded", () => {
     $("playerNickname").value = `${rName}_${rNum}`;
   });
 
-  $("showCreateModalBtn").addEventListener("click", () => {
-    if (!checkNickname()) return;
-    $("createRoomModal").classList.remove("hidden");
-  });
-
-  $("closeCreateModal").addEventListener("click", () => {
-    $("createRoomModal").classList.add("hidden");
-  });
-
-  $("showJoinModalBtn").addEventListener("click", () => {
-    if (!checkNickname()) return;
-    $("joinRoomModal").classList.remove("hidden");
-  });
-
-  $("closeJoinModal").addEventListener("click", () => {
-    $("joinRoomModal").classList.add("hidden");
-  });
-
-  $("randomCodeBtn").addEventListener("click", () => {
-    const code = Math.floor(1000 + Math.random() * 9000);
-    $("newRoomCode").value = code;
-  });
-
-  $("confirmCreateRoom").addEventListener("click", () => {
-    const code = $("newRoomCode").value.trim();
-    if (!code) {
-      alert("Iltimos, xona kodini kiriting yoki Random tugmasini bosing!");
+  $("joinGlobalRoomBtn").addEventListener("click", () => {
+    const nick = $("playerNickname").value.trim();
+    if (!nick) {
+      alert("Iltimos, oldin o'zingizga nik kiriting yoki Random ism tanlang!");
       return;
     }
-    currentRoom = code;
-    $("createRoomModal").classList.add("hidden");
-    openWaitingRoom();
-  });
-
-  $("confirmJoinRoom").addEventListener("click", () => {
-    const code = $("enterRoomCode").value.trim();
-    if (!code) {
-      alert("Iltimos, xona kodini kiriting!");
-      return;
-    }
-    currentRoom = code;
-    $("joinRoomModal").classList.add("hidden");
+    playerName = nick;
     openWaitingRoom();
   });
 
   $("startMultiGameBtn").addEventListener("click", () => {
-    localStorage.setItem('revmo_start_' + currentRoom, 'true');
+    localStorage.setItem('revmo_global_start', 'true');
     startRealGame();
   });
 });
 
-function checkNickname() {
-  const nick = $("playerNickname").value.trim();
-  if (!nick) {
-    alert("Iltimos, oldin o'zingizga nik kiriting yoki Random ism tanlang!");
-    return false;
-  }
-  playerName = nick;
-  return true;
-}
-
 function openWaitingRoom() {
   $("room-menu").classList.add("hidden");
   $("waiting-room").classList.remove("hidden");
-  $("lobbyRoomCode").textContent = currentRoom;
 
-  // Xonadagilar ro'yxatini LocalStorage'ga qo'shamiz
-  let key = 'revmo_room_' + currentRoom;
+  let key = 'revmo_global_room_players';
   let players = JSON.parse(localStorage.getItem(key)) || [];
   
   if (!players.includes(playerName)) {
@@ -169,12 +121,10 @@ function openWaitingRoom() {
   roomPlayers = players;
   updatePlayerListUI();
 
-  // Har 1 sekundda boshqa o'yinchilar qo'shilganini tekshirib turamiz
   if (storageInterval) clearInterval(storageInterval);
   storageInterval = setInterval(() => {
     let currentStoredPlayers = JSON.parse(localStorage.getItem(key)) || [];
     
-    // Yangi o'yinchi qo'shilgan bo'lsa yangilaymiz
     if (currentStoredPlayers.length !== roomPlayers.length || !currentStoredPlayers.every(p => roomPlayers.includes(p))) {
       roomPlayers = currentStoredPlayers;
       if (!roomPlayers.includes(playerName)) {
@@ -184,8 +134,7 @@ function openWaitingRoom() {
       updatePlayerListUI();
     }
 
-    // Agar o'yin boshlangan bo'lsa boshqalarda ham ochiladi
-    if (localStorage.getItem('revmo_start_' + currentRoom) === 'true') {
+    if (localStorage.getItem('revmo_global_start') === 'true') {
       clearInterval(storageInterval);
       startRealGame();
     }
@@ -216,27 +165,27 @@ function updatePlayerListUI() {
 
 function leaveLobby() {
   if (storageInterval) clearInterval(storageInterval);
-  removeFromRoom();
+  removeFromGlobalRoom();
   $("waiting-room").classList.add("hidden");
   $("room-menu").classList.remove("hidden");
 }
 
-function removeFromRoom() {
-  let key = 'revmo_room_' + currentRoom;
+function removeFromGlobalRoom() {
+  let key = 'revmo_global_room_players';
   let players = JSON.parse(localStorage.getItem(key)) || [];
   players = players.filter(p => p !== playerName);
   if (players.length > 0) {
     localStorage.setItem(key, JSON.stringify(players));
   } else {
     localStorage.removeItem(key);
-    localStorage.removeItem('revmo_start_' + currentRoom);
+    localStorage.removeItem('revmo_global_start');
   }
 }
 
 function resetToMenu() {
   clearInterval(timer);
   if (storageInterval) clearInterval(storageInterval);
-  removeFromRoom();
+  removeFromGlobalRoom();
   $("game").classList.add("hidden");
   $("result").classList.add("hidden");
   $("waiting-room").classList.add("hidden");
@@ -267,7 +216,7 @@ function render() {
 
   const m = missions[stage];
   $("title").textContent = m.title;
-  $("mission").textContent = `XONA: ${currentRoom} | MISSIYA ${stage + 1} / 3 (${playerName})`;
+  $("mission").textContent = `UMUMIY ZAL | MISSIYA ${stage + 1} / 3 (${playerName})`;
   $("stage").textContent = `BOSQICH ${stage + 1}`;
   $("instruction").textContent = m.instruction;
   $("time").textContent = time;
@@ -443,7 +392,6 @@ function showResult() {
   $("result").classList.remove("hidden");
   $("finalScore").textContent = score;
   $("resultNick").textContent = playerName;
-  $("resultRoom").textContent = currentRoom;
   $("resultTitle").textContent =
     score >= 240 ? "Laboratoriya ustasi!" :
     score >= 160 ? "Yaxshi ish, detektiv!" : "Yana bir bor urinib ko‘ring!";
