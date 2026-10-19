@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REVMO LAB | Real Multiplayer</title>
+  <title>REVMO LAB | Umumiy Xona</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,13 +13,13 @@
   </header>
 
   <main>
-    <!-- ASOSIY MENYU -->
+    <!-- ASOSIY KIRISH MENYUSI -->
     <section id="room-menu" class="hero">
       <div>
-        <p class="eyebrow">REAL OYINCHILAR LOBBIsi</p>
+        <p class="eyebrow">UMUMIY LOBBI</p>
         <h1>Detektivlar <span>xonasi.</span></h1>
         <p class="description">
-          Oʻyinga kirish uchun nik kiriting. Xona yarating yoki doʻstingiz ochgan xona kodini kiritib qoʻshiling. Kamida 2 kishi yigʻilishi shart.
+          Oʻyinga kirish uchun oʻzingizga laqab (nik) kiriting va umumiy zalga qoʻshiling. Oʻyin boshlanishi uchun kamida 2 kishi kerak.
         </p>
         
         <div class="setup-box" style="margin: 20px 0; display: grid; gap: 12px; max-width: 380px;">
@@ -27,65 +27,26 @@
           
           <div style="display: flex; gap: 10px;">
             <button type="button" class="secondary" id="randomNickBtn" style="flex: 1; border: 1px solid #355363;">🎲 Random ism</button>
-          </div>
-
-          <hr style="border-color: #294251; margin: 5px 0;">
-
-          <div style="display: flex; gap: 10px;">
-            <button type="button" id="showCreateModalBtn" style="flex: 1; background: #245567; color: var(--mint);">🏠 Xona yaratish</button>
-            <button type="button" id="showJoinModalBtn" style="flex: 1;">🔗 Xonaga kirish</button>
+            <button type="button" id="joinGlobalRoomBtn" style="flex: 1; background: #245567; color: var(--mint);">Zalga kirish →</button>
           </div>
         </div>
       </div>
       <div class="lab-art">
         <div class="orb">🧪</div>
         <div class="float one">Min 2 kishi</div>
-        <div class="float two">Real o'yinchilar</div>
-        <div class="float three">Kutish zali</div>
+        <div class="float two">Umumiy Zal</div>
+        <div class="float three">Real vaqt</div>
       </div>
     </section>
 
-    <!-- XONA YARATISH MODALI -->
-    <div id="createRoomModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,21,31,0.85); display:grid; place-items:center; z-index:100;">
-      <div style="background:#102635; padding:30px; border-radius:16px; border:1px solid #2c4b5a; max-width:400px; width:90%; display:grid; gap:15px;">
-        <h3 style="margin:0; color:var(--mint);">Xona yaratish</h3>
-        <div>
-          <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">Xona kodi:</label>
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="newRoomCode" placeholder="Masalan: 4821" style="flex:1; padding:12px; border-radius:8px; background:#132c3b; border:1px solid #2c4b5a; color:white;">
-            <button type="button" class="secondary" id="randomCodeBtn" style="padding:10px; border:1px solid #355363;">🎲 Random</button>
-          </div>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-          <button type="button" class="secondary" id="closeCreateModal" style="flex:1;">Orqaga</button>
-          <button type="button" id="confirmCreateRoom" style="flex:1;">Tuzish →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- XONAGA KIRISH MODALI -->
-    <div id="joinRoomModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,21,31,0.85); display:grid; place-items:center; z-index:100;">
-      <div style="background:#102635; padding:30px; border-radius:16px; border:1px solid #2c4b5a; max-width:400px; width:90%; display:grid; gap:15px;">
-        <h3 style="margin:0; color:var(--mint);">Xonaga ulanish</h3>
-        <div>
-          <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">Xona kodini kiriting:</label>
-          <input type="text" id="enterRoomCode" placeholder="Xona kodi..." style="width:100%; padding:12px; border-radius:8px; background:#132c3b; border:1px solid #2c4b5a; color:white;">
-        </div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-          <button type="button" class="secondary" id="closeJoinModal" style="flex:1;">Orqaga</button>
-          <button type="button" id="confirmJoinRoom" style="flex:1;">Kirish →</button>
-        </div>
-      </div>
-    </div>
-
     <!-- KUTISH ZALI -->
     <section id="waiting-room" class="hidden" style="max-width:600px; margin:40px auto; padding:30px; background:#0d202d; border:1px solid #294858; border-radius:20px; text-align:center;">
-      <p class="eyebrow">KUTISH ZALI (REAL ODAMLAR)</p>
-      <h2>Xona kodi: <span id="lobbyRoomCode" style="color:var(--mint);">----</span></h2>
-      <p class="description" style="margin: 15px 0;">Haqiqiy o'yinchilar qo'shilishini kutmoqdamiz...</p>
+      <p class="eyebrow">UMUMIY KUTISH ZALI</p>
+      <h2>Laboratoriya Zali</h2>
+      <p class="description" style="margin: 15px 0;">Boshqa o'yinchilarning qo'shilishini kutmoqdamiz...</p>
       
       <div style="background:#132c3b; padding:20px; border-radius:12px; margin:20px 0; border:1px solid #2c4b5a;">
-        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Xonadagi real o'yinchilar:</p>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Zaldagi o'yinchilar:</p>
         <ul id="playerList" style="list-style:none; padding:0; margin:0; display:grid; gap:8px; font-weight:600; color:var(--mint);">
           <!-- O'yinchilar ro'yxati -->
         </ul>
@@ -130,7 +91,7 @@
       <div class="trophy">🏆</div>
       <p class="eyebrow">MISSIYA YAKUNLANDI</p>
       <h2 id="resultTitle">Ajoyib, detektiv!</h2>
-      <p>Oʻyinchi: <b id="resultNick" style="color: var(--mint);"></b> | Xona: <b id="resultRoom" style="color: var(--mint);"></b></p>
+      <p>Oʻyinchi: <b id="resultNick" style="color: var(--mint);"></b></p>
       <p>Yakuniy natijangiz:</p>
       <div class="final-score"><b id="finalScore">0</b><span> / 300 ball</span></div>
       <div id="details"></div>
